@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import './App.css';
 import TodoList, {TaskType} from './Todolist'
 import {v1} from "uuid";
+import {AddItemForm} from "./AddItemForm";
 
 // create
 // read
@@ -85,13 +86,30 @@ function App(): JSX.Element {
         //setTasks(tasks.map(t => t.id === taskId ? {...t, isDone: newIsDone} : t))
         setTasks({...tasks,[todolistId]:tasks[todolistId].map(t => t.id === taskId ? {...t, isDone: newIsDone} : t)})
     }
+
+    const changeTaskTitle=(taskId: string, newTitle: string,todolistId:string) => {
+
+        setTasks({...tasks,[todolistId]:tasks[todolistId].map(t => t.id === taskId ? {...t, title: newTitle} : t)})}
+
     const changeTodoListFilter = (filter: FilterValuesType,todolistId:string) => {
         setTodoLists(todoLists.map(task=>task.id === todolistId ? {...task,filter:filter} :task))
         //setFilter(filter)
     }
+    const changeTodoListTitle=( newTodoTitle: string,todolistId:string)=>{
+        setTodoLists(todoLists.map(tl=>tl.id ===todolistId? {...tl,title:newTodoTitle}: tl))
+    }
     const removeTodolist = (todolistId:string) => {
         setTodoLists(todoLists.filter(todolist => todolist.id !==todolistId))
         delete tasks[todolistId]
+    }
+    const addTodoList=(title:string)=>{
+        const newTodo: TodolistType = {
+            id:v1(),
+            title,
+            filter:'all'
+        }
+        setTodoLists([...todoLists,newTodo])
+        setTasks({...tasks,[newTodo.id]:[]})
     }
 
     //UI
@@ -124,12 +142,15 @@ function App(): JSX.Element {
                 changeTaskStatus={changeTaskStatus}
                 removeTodolist={removeTodolist}
                 changeTodoListFilter={changeTodoListFilter}
+                changeTaskTitle={changeTaskTitle}
+                changeTodoListTitle={changeTodoListTitle}
             />
         )
     })
 
     return (
         <div className="App">
+            <AddItemForm addItem={addTodoList} recommendedTitleLength={15} maxTitleLength={20}/>
             {todoListsComponents}
         </div>
     );

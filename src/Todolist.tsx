@@ -1,5 +1,7 @@
-import React, {ChangeEvent, KeyboardEvent, FC, useRef, useState} from 'react';
+import React, {ChangeEvent,  FC} from 'react';
 import {FilterValuesType} from "./App";
+import {AddItemForm} from "./AddItemForm";
+import EditableSpan from "./EditableSpan";
 
 // rsc
 
@@ -13,6 +15,8 @@ type TodoListPropsType = {
     addTask: (title: string,todolistId:string) => void
     todolistId:string
     removeTodolist:(todolistId:string)=>void
+    changeTaskTitle:(taskId: string, newTitle: string,todolistId:string)=>void
+    changeTodoListTitle:( newTodoTitle: string,todolistId:string)=>void
 }
 
 export type TaskType = {
@@ -22,10 +26,6 @@ export type TaskType = {
 }
 
 const TodoList: FC<TodoListPropsType> = (props) => {
-
-    const [title, setTitle] = useState<string>("")
-    const [error, setError] = useState<boolean>(false)
-
 
     let isAllTasksNotIsDone = true // все не выполенные
     for (let i = 0; i < props.tasks.length; i++) {
@@ -41,78 +41,34 @@ const TodoList: FC<TodoListPropsType> = (props) => {
         const removeTaskHandler = () => props.removeTask(task.id,props.todolistId
         )
         const changeTaskStatus = (e: ChangeEvent<HTMLInputElement>) => props.changeTaskStatus(task.id, e.currentTarget.checked,props.todolistId)
-
+        const changeTaskTitle = (newTitle:string)=>props.changeTaskTitle(task.id,newTitle,props.todolistId)
         return (
-            <li>
+            <li key={task.id}>
                 <input
                     onChange={changeTaskStatus}
                     type="checkbox"
                     checked={task.isDone}
                 />
-                <span
-                    className={task.isDone ? "task-done" : "task"}>
-                    {task.title}
-                </span>
+                <EditableSpan title={task.title}
+                              classes={task.isDone ? "task-done" : "task"}
+                              changeTitle={changeTaskTitle}/>
                 <button onClick={removeTaskHandler}>x</button>
             </li>
         )
     })
 
-    const maxTitleLength = 20
-    const recommendedTitleLength = 10
-    const isAddTaskNotPossible: boolean = !title.length || title.length > maxTitleLength || error
 
-
-    const addTaskHandler = () => {
-        const trimmedTitle = title.trim()
-        if(trimmedTitle){
-            props.addTask(trimmedTitle,props.todolistId)
-        } else {
-            setError(true)
-        }
-        setTitle("")
-    }
-    const setLocalTitleHandler = (e: ChangeEvent<HTMLInputElement>) => {
-        error && setError(false)
-        setTitle(e.currentTarget.value)
-    }
+    const addTask = (title:string) => {props.addTask(title,props.todolistId)}
     const removeTodolist =() => props.removeTodolist(props.todolistId)
-
-    const onKeyDownAddTaskHandler = isAddTaskNotPossible
-        ? undefined
-        : (e: KeyboardEvent<HTMLInputElement>) => e.key === "Enter" && addTaskHandler()
-
-    const longTitleWarningMessage = (title.length > recommendedTitleLength && title.length <= maxTitleLength) &&
-        <div style={{color: "white"}}>Title should be shorter</div>
-    const longTitleErrorMessage = title.length > maxTitleLength &&
-        <div style={{color: "#f23391"}}>Title is too long!!!</div>
-    const errorMessage = error &&   <div style={{color: "#f23391"}}>Title is hard required!</div>
-
+    const changeTitle=(newTitle:string)=> props.changeTodoListTitle(newTitle,props.todolistId)
 
     return (
         <div className={todoClasses}>
-
             <h3>
-                {props.title}
+                <EditableSpan title={props.title}  changeTitle={changeTitle}/>
                 <button onClick={removeTodolist}>X</button>
             </h3>
-            <div>
-                <input
-                    placeholder="Enter task title, please"
-                    value={title}
-                    onChange={setLocalTitleHandler}
-                    onKeyDown={onKeyDownAddTaskHandler}
-                    className={error ? "input-error" : ""}
-                />
-                <button
-                    disabled={isAddTaskNotPossible}
-                    onClick={addTaskHandler}
-                >+
-                </button>
-                {longTitleWarningMessage}
-                {longTitleErrorMessage}
-                {errorMessage}
-            </div>
+            <AddItemForm addItem={addTask} recommendedTitleLength={15} maxTitleLength={20}/>
             <ul>
                 {todoListItems}
             </ul>
