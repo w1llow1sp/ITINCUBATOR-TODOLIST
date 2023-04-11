@@ -3,6 +3,18 @@ import './App.css';
 import TodoList, {TaskType} from './Todolist'
 import {v1} from "uuid";
 import {AddItemForm} from "./AddItemForm";
+import {
+    AppBar,
+    Button,
+    Checkbox, Container, createTheme, CssBaseline,
+    FormControlLabel,
+    FormGroup, Grid,
+    IconButton, Paper, ThemeProvider,
+    Toolbar,
+    Typography
+} from "@mui/material";
+import {Menu} from "@mui/icons-material";
+import {amber, lightGreen} from "@mui/material/colors";
 
 // create
 // read
@@ -48,6 +60,7 @@ function App(): JSX.Element {
     })
 
 
+    const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
     const removeTask = (taskId: string,todolistId:string) => {
         //создаем переменную и получаем доступ к массиву с нужным todolistId
         const tasksForUpdate:Array<TaskType> =tasks[todolistId]
@@ -129,6 +142,8 @@ function App(): JSX.Element {
     const todoListsComponents = todoLists.map(todolist => {
         const tasksForRender: Array<TaskType> = getFilteredTasksForRender(tasks[todolist.id], todolist.filter)
         return (
+            <Grid item>
+                <Paper elevation={8}>
             <TodoList
                 key={todolist.id}
 
@@ -145,14 +160,60 @@ function App(): JSX.Element {
                 changeTaskTitle={changeTaskTitle}
                 changeTodoListTitle={changeTodoListTitle}
             />
+                </Paper>
+            </Grid>
         )
     })
 
+    const mode = isDarkMode? 'dark' : 'light'
+    const customTheme = createTheme({
+        palette: {
+            primary: amber,
+            secondary:lightGreen ,
+            mode:mode
+        }
+    })
+
     return (
+        <ThemeProvider theme={customTheme}>
+            <CssBaseline>
         <div className="App">
+            <AppBar position="static">
+                <Toolbar>
+                    <IconButton
+                        size="large"
+                        edge="start"
+                        color="inherit"
+                        aria-label="menu"
+                        sx={{mr: 2}}
+                    >
+                        <Menu/>
+                    </IconButton>
+                    <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
+                        TodoLists
+                    </Typography>
+                    <FormGroup>
+                        <FormControlLabel
+                            control={<Checkbox
+                                onChange={(e)=>setIsDarkMode(e.currentTarget.checked)} />}
+                            label={isDarkMode ? "Light mode" : "Dark mode"}
+                        />
+                    </FormGroup>
+
+                    <Button color="inherit">Login</Button>
+                </Toolbar>
+            </AppBar>
+            <Container fixed>
+                <Grid container sx={{p:'15px 0'}}>
             <AddItemForm addItem={addTodoList} recommendedTitleLength={15} maxTitleLength={20}/>
+                </Grid>
+                <Grid container spacing={4}>
             {todoListsComponents}
+                </Grid>
+            </Container>
         </div>
+            </CssBaseline>
+        </ThemeProvider>
     );
 }
 

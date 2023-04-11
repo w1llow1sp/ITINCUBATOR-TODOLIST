@@ -1,4 +1,7 @@
 import React, {ChangeEvent, FC, KeyboardEvent, useState} from 'react';
+import AddIcon from '@mui/icons-material/Add';
+import AddBoxIcon from '@mui/icons-material/AddBox';
+import {IconButton, TextField} from "@mui/material";
 
 type AddItemFormPropsType ={
     addItem:(title:string)=>void
@@ -17,10 +20,10 @@ export const AddItemForm:FC<AddItemFormPropsType> = ({addItem, recommendedTitleL
     const isAddTaskNotPossible: boolean = !title.length || title.length > maxTitleLength || error
 
     const longTitleWarningMessage = (title.length > recommendedTitleLength && title.length <= maxTitleLength) &&
-        <div style={{color: "white"}}>Title should be shorter</div>
+        <span style={{color: "white"}}>Title should be shorter</span>
     const longTitleErrorMessage = title.length > maxTitleLength &&
-        <div style={{color: "#f23391"}}>Title is too long!!!</div>
-    const errorMessage = error &&   <div style={{color: "#f23391"}}>Title is hard required!</div>
+        <span style={{color: "#f23391"}}>Title is too long!!!</span>
+    const errorMessage = error &&  'Title is hard required!'
 
     const addTaskHandler = () => {
         const trimmedTitle = title.trim()
@@ -39,21 +42,22 @@ export const AddItemForm:FC<AddItemFormPropsType> = ({addItem, recommendedTitleL
 
     return (
         <div>
-            <input
-                placeholder="Enter task title, please"
+            <TextField
+                size={'small'}
+                placeholder="Enter item title, please"
                 value={title}
                 onChange={setLocalTitleHandler}
                 onKeyDown={onKeyDownAddTaskHandler}
-                className={error ? "input-error" : ""}
+                error={error}
+                helperText={errorMessage || longTitleWarningMessage ||longTitleErrorMessage}
             />
-            <button
+
+            <IconButton
+                size={'small'}
                 disabled={isAddTaskNotPossible}
-                onClick={addTaskHandler}
-            >+
-            </button>
-            {longTitleWarningMessage}
-            {longTitleErrorMessage}
-            {errorMessage}
+                onClick={addTaskHandler}>
+                <AddBoxIcon/>
+            </IconButton>
         </div>
     );
 };
