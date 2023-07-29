@@ -164,15 +164,33 @@ export const createTaskTC = (todoId: string, title: string) => (dispatch: Dispat
         })
 }
 
-export const changeTaskStatusTC = (taskId: string,status: TaskStatuses, todolistId: string ) => {
+export const changeTaskTitleTC = (taskId: string, title: string, todolistId: string) => (dispatch: Dispatch, getState: () => AppRootStateType) => {
+    const task = getState().tasks[todolistId].find((t) => t.id === taskId)
+    if (task) {
+        const model: UpdateTaskModelType = {
+            title: task.title,
+            startDate: task.startDate,
+            priority: task.priority,
+            description: task.description,
+            deadline: task.deadline,
+            status: task.status
+        }
+         todolistsAPI.updateTask(todolistId,taskId,model)
+             .then((res) => {
+                 dispatch(changeTaskTitleAC(taskId,title,todolistId))
+             })
+    }
+}
+
+export const changeTaskStatusTC = (taskId: string, status: TaskStatuses, todolistId: string) => {
     return (dispatch: Dispatch, getState: () => AppRootStateType) => {
         // так как мы обязаны на сервер отправить все св-ва, которые сервер ожидает, а не только
         // те, которые мы хотим обновить, соответственно нам нужно в этом месте взять таску целиком
         // чтобы у неё отобрать остальные св-ва
 
-        const task = getState().tasks[todolistId].find((t)=>t.id === taskId)
+        const task = getState().tasks[todolistId].find((t) => t.id === taskId)
         if (task) {
-            const model:UpdateTaskModelType = {
+            const model: UpdateTaskModelType = {
                 title: task.title,
                 startDate: task.startDate,
                 priority: task.priority,
@@ -186,7 +204,6 @@ export const changeTaskStatusTC = (taskId: string,status: TaskStatuses, todolist
                 })
 
         }
-
 
 
     }
